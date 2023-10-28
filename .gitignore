@@ -1,0 +1,7 @@
+/node_modules
+/tmp
+/bindings
+/build
+/src
+/binding.*
+/parser.*

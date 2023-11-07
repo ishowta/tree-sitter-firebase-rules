@@ -159,10 +159,7 @@ module.exports = grammar({
     function_call_expression: ($) =>
       prec(
         "call",
-        seq(
-          field("function", $._expression),
-          field("params", $.function_params)
-        )
+        seq(field("name", $.identifier), field("params", $.function_params))
       ),
 
     function_params: ($) =>

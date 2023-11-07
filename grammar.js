@@ -26,51 +26,71 @@ module.exports = grammar({
 
   rules: {
     source_file: ($) =>
-      seq(optional($.rules_version_statement), repeat($.service_declaration)),
+      seq(
+        field("version", optional($.rules_version_statement)),
+        repeat(field("service", $.service_declaration))
+      ),
 
     rules_version_statement: ($) =>
-      seq("rules_version", "=", $.string, optional(";")),
+      seq("rules_version", "=", field("version", $.string), optional(";")),
+
+    service_name_identifier: ($) => /[^\s]+/,
 
     service_declaration: ($) =>
       seq(
         "service",
-        /[^\s]+/,
+        field("name", $.service_name_identifier),
         "{",
-        choice($.function_declaration, $.match_declaration),
+        repeat(
+          choice(
+            field("function", $.function_declaration),
+            field("match", $.match_declaration)
+          )
+        ),
         "}"
       ),
 
     function_declaration: ($) =>
       seq(
         "function",
-        $.identifier,
-        $.function_argument,
+        field("name", $.identifier),
+        field("argument", $.function_argument),
         "{",
-        $.function_body,
+        field("body", $.function_body),
         "}"
       ),
 
     function_argument: ($) =>
       seq(
         "(",
-        optional(seq($.identifier, repeat(seq(",", $.identifier)))),
+        optional(
+          seq(
+            field("arg", $.identifier),
+            repeat(seq(",", field("arg", $.identifier)))
+          )
+        ),
         ")"
       ),
 
-    function_body: ($) => seq(repeat($.statement), $.return_statement),
+    function_body: ($) =>
+      seq(
+        repeat(field("statement", $._statement)),
+        field("return", $.return_statement)
+      ),
 
-    return_statement: ($) => seq("return", $._expression, optional(";")),
+    return_statement: ($) =>
+      seq("return", field("expression", $._expression), optional(";")),
 
     match_declaration: ($) =>
       seq(
         "match",
-        $.match_path_parameter,
+        field("path", $.match_path_parameter),
         "{",
         repeat1(
           choice(
-            $.function_declaration,
-            $.match_declaration,
-            $.allow_declaration
+            field("function", $.function_declaration),
+            field("match", $.match_declaration),
+            field("allow", $.allow_declaration)
           )
         ),
         "}"
@@ -85,11 +105,15 @@ module.exports = grammar({
         )
       ),
 
-    path_string: ($) => /\/[a-zA-Z0-9_%\-~&'.:]+/, // TODO: misterias charset...
+    path_identifier: ($) => /[a-zA-Z0-9_%\-~&'.:]+/, // TODO: misterias charset...
 
-    path_capture_string: ($) => seq("/", "{", $.identifier, "}"),
+    path_string: ($) => seq("/", field("path", $.path_identifier)),
 
-    path_capture_group_string: ($) => seq("/", "{", $.identifier, "=**", "}"),
+    path_capture_string: ($) =>
+      seq("/", "{", field("value", $.identifier), "}"),
+
+    path_capture_group_string: ($) =>
+      seq("/", "{", field("value", $.identifier), "=**", "}"),
 
     allow_operation_literal: ($) =>
       choice("read", "get", "list", "write", "update", "delete", "create"),
@@ -97,17 +121,24 @@ module.exports = grammar({
     allow_declaration: ($) =>
       seq(
         "allow",
-        $.allow_operation_literal,
-        repeat(seq(",", $.allow_operation_literal)),
+        field("operation", $.allow_operation_literal),
+        repeat(seq(",", field("operation", $.allow_operation_literal))),
         ":",
         "if",
-        $._expression,
+        field("expression", $._expression),
         optional(";")
       ),
 
-    statement: ($) => $.let_declaration,
+    _statement: ($) => $.let_declaration,
 
-    let_declaration: ($) => seq("let", $.identifier, "=", $._expression, ";"),
+    let_declaration: ($) =>
+      seq(
+        "let",
+        field("name", $.identifier),
+        "=",
+        field("expression", $._expression),
+        ";"
+      ),
 
     _expression: ($) =>
       choice(
@@ -121,25 +152,47 @@ module.exports = grammar({
       ),
 
     literal: ($) =>
-      choice($.string, $.number, $.boolean, $.list, $.path, $.null),
+      choice($.string, $.int, $.float, $.boolean, $.list, $.path, $.null),
 
-    paran: ($) => seq("(", $._expression, ")"),
+    paran: ($) => seq("(", field("expression", $._expression), ")"),
 
     function_call_expression: ($) =>
-      prec("call", seq($._expression, $.function_params)),
+      prec(
+        "call",
+        seq(
+          field("function", $._expression),
+          field("params", $.function_params)
+        )
+      ),
 
     function_params: ($) =>
       seq(
         "(",
-        optional(seq($._expression, repeat(seq(",", $._expression)))),
+        optional(
+          seq(
+            field("param", $._expression),
+            repeat(seq(",", field("param", $._expression)))
+          )
+        ),
         ")"
       ),
 
     member_expression: ($) =>
-      prec.left("member", seq($._expression, ".", $._expression)),
+      prec.left(
+        "member",
+        seq(field("object", $._expression), ".", field("member", $._expression))
+      ),
 
     subscript_expression: ($) =>
-      prec.left("subscript", seq($._expression, "[", $._expression, "]")),
+      prec.left(
+        "subscript",
+        seq(
+          field("object", $._expression),
+          "[",
+          field("subscript", $._expression),
+          "]"
+        )
+      ),
 
     _operator_expression: ($) =>
       choice($.unary_expression, $.binary_expression, $.ternary_expression),
@@ -147,7 +200,10 @@ module.exports = grammar({
     unary_expression: ($) =>
       prec.left(
         "unary_void",
-        seq(field("operator", choice("!", "-", "+", "~")), $._expression)
+        seq(
+          field("operator", choice("!", "-", "+", "~")),
+          field("expression", $._expression)
+        )
       ),
 
     binary_expression: ($) =>
@@ -174,7 +230,11 @@ module.exports = grammar({
         ].map(([operator, precedence]) =>
           prec.left(
             precedence,
-            seq($._expression, field("operator", operator), $._expression)
+            seq(
+              field("left", $._expression),
+              field("operator", operator),
+              field("right", $._expression)
+            )
           )
         )
       ),
@@ -182,7 +242,13 @@ module.exports = grammar({
     ternary_expression: ($) =>
       prec.right(
         "ternary",
-        seq($._expression, "?", $._expression, ":", $._expression)
+        seq(
+          field("condition", $._expression),
+          "?",
+          field("true", $._expression),
+          ":",
+          field("false", $._expression)
+        )
       ),
 
     identifier: ($) => /[a-zA-Z_][a-zA-Z_0-9]+/,
@@ -195,7 +261,9 @@ module.exports = grammar({
         )
       ),
 
-    number: ($) => choice(/[0-9]+(|\.[0-9]*)/, /\.[0-9]+/),
+    int: ($) => /[0-9]+/,
+
+    float: ($) => choice(/[0-9]+\.[0-9]*/, /\.[0-9]+/),
 
     boolean: ($) => choice("true", "false"),
 
@@ -204,14 +272,20 @@ module.exports = grammar({
     list: ($) =>
       seq(
         "[",
-        optional(seq($._expression, repeat(seq(",", optional($._expression))))),
+        optional(
+          seq(
+            field("element", $._expression),
+            repeat(seq(",", optional(field("element", $._expression))))
+          )
+        ),
         "]"
       ),
 
     path: ($) =>
       prec.right(repeat1(choice($.path_string, $.path_reference_string))),
 
-    path_reference_string: ($) => seq("/", "$", "(", $._expression, ")"),
+    path_reference_string: ($) =>
+      seq("/", "$", "(", field("value", $._expression), ")"),
 
     comment: ($) => token(choice(/\/\/.*/, /\/\*([^/*]|\*+[^*\/])*\*+\//)),
   },

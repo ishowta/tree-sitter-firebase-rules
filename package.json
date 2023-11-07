@@ -2,13 +2,14 @@
   "name": "tree-sitter-firebase-rules",
   "version": "0.0.1",
   "description": "firebase rules grammar for the tree-sitter parsing library",
+  "main": "bindings/node",
   "scripts": {
     "setup-tree-sitter": "tree-sitter init-config",
     "setup-node-gyp": "node-gyp configure",
     "generate": "tree-sitter generate",
     "build": "pnpm generate && node-gyp build",
     "parse": "tree-sitter parse",
-    "test": "pnpm generate && pnpm parse example.txt",
+    "test": "pnpm generate && pnpm parse tmp/example.txt",
     "debug": "node ./src/debug.js"
   },
   "repository": {

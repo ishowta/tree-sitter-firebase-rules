@@ -192,7 +192,7 @@ module.exports = grammar({
       ),
 
     _operator_expression: ($) =>
-      choice($.unary_expression, $.binary_expression, $.ternary_expression),
+      choice($.unary_expression, $.binary_expression, $.ternary_expression, $.typecheck_expression),
 
     unary_expression: ($) =>
       prec.left(
@@ -222,7 +222,6 @@ module.exports = grammar({
           ["!=", "binary_equality"],
           [">=", "binary_relation"],
           [">", "binary_relation"],
-          ["is", "binary_relation"],
           ["in", "binary_relation"],
         ].map(([operator, precedence]) =>
           prec.left(
@@ -247,6 +246,15 @@ module.exports = grammar({
           field("false", $._expression)
         )
       ),
+
+    typecheck_expression: $ => prec.left(
+      "binary_relation",
+      seq(
+        field("expression", $._expression),
+        field("operator", "is"),
+        field("type", $.identifier)
+      )
+    ),
 
     identifier: ($) => /[a-zA-Z_][a-zA-Z_0-9]+/,
 

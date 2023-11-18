@@ -256,7 +256,7 @@ module.exports = grammar({
       )
     ),
 
-    identifier: ($) => /[a-zA-Z_][a-zA-Z_0-9]+/,
+    identifier: ($) => /[a-zA-Z_][a-zA-Z_0-9]*/,
 
     string: ($) =>
       token(

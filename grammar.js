@@ -152,7 +152,16 @@ module.exports = grammar({
       ),
 
     literal: ($) =>
-      choice($.string, $.int, $.float, $.boolean, $.list, $.path, $.null),
+      choice(
+        $.string,
+        $.int,
+        $.float,
+        $.boolean,
+        $.list,
+        $.map,
+        $.path,
+        $.null
+      ),
 
     paran: ($) => seq("(", field("expression", $._expression), ")"),
 
@@ -192,7 +201,12 @@ module.exports = grammar({
       ),
 
     _operator_expression: ($) =>
-      choice($.unary_expression, $.binary_expression, $.ternary_expression, $.typecheck_expression),
+      choice(
+        $.unary_expression,
+        $.binary_expression,
+        $.ternary_expression,
+        $.typecheck_expression
+      ),
 
     unary_expression: ($) =>
       prec.left(
@@ -247,14 +261,15 @@ module.exports = grammar({
         )
       ),
 
-    typecheck_expression: $ => prec.left(
-      "binary_relation",
-      seq(
-        field("expression", $._expression),
-        field("operator", "is"),
-        field("type", $.identifier)
-      )
-    ),
+    typecheck_expression: ($) =>
+      prec.left(
+        "binary_relation",
+        seq(
+          field("expression", $._expression),
+          field("operator", "is"),
+          field("type", $.identifier)
+        )
+      ),
 
     identifier: ($) => /[a-zA-Z_][a-zA-Z_0-9]*/,
 
@@ -284,6 +299,20 @@ module.exports = grammar({
           )
         ),
         "]"
+      ),
+
+    entry: ($) => seq(field("key", $.string), ":", field("value", $._expression)),
+
+    map: ($) =>
+      seq(
+        "{",
+        optional(
+          seq(
+            field("entry", $.entry),
+            repeat(seq(",", optional(field("entry", $.entry))))
+          )
+        ),
+        "}"
       ),
 
     path: ($) =>

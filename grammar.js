@@ -316,10 +316,13 @@ module.exports = grammar({
       ),
 
     path: ($) =>
-      prec.right(repeat1(choice($.path_string, $.path_reference_string))),
+      prec.right(repeat1(choice($.path_string, $.path_reference_string, $.path_bind_string))),
 
     path_reference_string: ($) =>
       seq("/", "$", "(", field("value", $._expression), ")"),
+
+    path_bind_string: ($) =>
+      seq("/", "{", field("value", $.identifier), "}"),
 
     comment: ($) => token(choice(/\/\/.*/, /\/\*([^/*]|\*+[^*\/])*\*+\//)),
   },

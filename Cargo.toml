@@ -2,7 +2,7 @@
 name = "tree-sitter-rules"
 description = "firebase rules grammar for the tree-sitter parsing library"
 version = "0.0.1"
-keywords = ["incremental", "parsing", "rules"]
+keywords = ["incremental", "parsing", "rules", "firebase"]
 categories = ["parsing", "text-editors"]
 repository = "https://github.com/ishowta/tree-sitter-firebase-rules"
 edition = "2018"

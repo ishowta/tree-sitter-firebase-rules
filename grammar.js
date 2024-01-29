@@ -236,7 +236,6 @@ module.exports = grammar({
           ["!=", "binary_equality"],
           [">=", "binary_relation"],
           [">", "binary_relation"],
-          ["in", "binary_relation"],
         ].map(([operator, precedence]) =>
           prec.left(
             precedence,
@@ -244,6 +243,18 @@ module.exports = grammar({
               field("left", $._expression),
               field("operator", operator),
               field("right", $._expression)
+            )
+          )
+        ),
+        ...[
+          ["in", "binary_relation"],
+        ].map(([operator, precedence]) =>
+          prec.left(
+            precedence,
+            seq(
+              field("right", $._expression),
+              field("operator", operator),
+              field("left", $._expression)
             )
           )
         )

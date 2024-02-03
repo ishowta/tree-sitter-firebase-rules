@@ -15,11 +15,8 @@ module.exports = grammar({
       "binary_plus",
       "binary_relation",
       "binary_equality",
-      "bitwise_and",
-      "bitwise_xor",
-      "bitwise_or",
-      "logical_and",
-      "logical_or",
+      "and",
+      "or",
       "ternary",
     ],
   ],
@@ -220,11 +217,8 @@ module.exports = grammar({
     binary_expression: ($) =>
       choice(
         ...[
-          ["&&", "logical_and"],
-          ["||", "logical_or"],
-          ["&", "bitwise_and"],
-          ["^", "bitwise_xor"],
-          ["|", "bitwise_or"],
+          ["&&", "and"],
+          ["||", "or"],
           ["+", "binary_plus"],
           ["-", "binary_plus"],
           ["*", "binary_times"],

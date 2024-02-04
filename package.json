@@ -1,6 +1,6 @@
 {
   "name": "tree-sitter-firebase-rules",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "firebase rules grammar for the tree-sitter parsing library",
   "main": "bindings/node",
   "scripts": {

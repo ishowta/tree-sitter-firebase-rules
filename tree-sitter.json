@@ -1,0 +1,40 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "rules",
+      "camelcase": "Rules",
+      "title": "firebase rules",
+      "scope": "source.rules",
+      "file-types": [
+        "rules"
+      ],
+      "injection-regex": "^rules$",
+      "class-name": "TreeSitterRules"
+    }
+  ],
+  "metadata": {
+    "version": "0.0.5",
+    "license": "MIT",
+    "description": "firebase rules grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "ishowta",
+        "email": "ishowta@gmail.com",
+        "url": "https://iwata.love/"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/ishowta/tree-sitter-firebase-rules"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true,
+    "zig": false
+  }
+}

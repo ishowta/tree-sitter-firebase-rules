@@ -1,5 +1,12 @@
+/**
+ * @file FirebaseRules grammar for tree-sitter
+ * @author ishowta <ishowta@gmail.com>
+ * @license MIT
+ */
+
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
+
 module.exports = grammar({
   name: "rules",
 
@@ -240,9 +247,7 @@ module.exports = grammar({
             )
           )
         ),
-        ...[
-          ["in", "binary_relation"],
-        ].map(([operator, precedence]) =>
+        ...[["in", "binary_relation"]].map(([operator, precedence]) =>
           prec.left(
             precedence,
             seq(
@@ -306,7 +311,8 @@ module.exports = grammar({
         "]"
       ),
 
-    entry: ($) => seq(field("key", $.string), ":", field("value", $._expression)),
+    entry: ($) =>
+      seq(field("key", $.string), ":", field("value", $._expression)),
 
     map: ($) =>
       seq(
@@ -321,13 +327,16 @@ module.exports = grammar({
       ),
 
     path: ($) =>
-      prec.right(repeat1(choice($.path_string, $.path_reference_string, $.path_bind_string))),
+      prec.right(
+        repeat1(
+          choice($.path_string, $.path_reference_string, $.path_bind_string)
+        )
+      ),
 
     path_reference_string: ($) =>
       seq("/", "$", "(", field("value", $._expression), ")"),
 
-    path_bind_string: ($) =>
-      seq("/", "{", field("value", $.identifier), "}"),
+    path_bind_string: ($) => seq("/", "{", field("value", $.identifier), "}"),
 
     comment: ($) => token(choice(/\/\/.*/, /\/\*([^/*]|\*+[^*\/])*\*+\//)),
   },
